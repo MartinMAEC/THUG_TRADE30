@@ -42,7 +42,7 @@
           <h5 class="card-title">{{ p.nombreprod | title }}</h5>
           <p class="card-text">{{ p.artista }}</p>
           <p class="card-text">${{ p.precio | intcomma }}</p>
-          <a href="{% url 'vistaprod' p.id %}" class="btn btn-primary">Comprar</a>
+          <a href="{% url 'detalle_producto' p.id %}" class="btn btn-primary">ver</a>
         </div>
       </div>
     </div>

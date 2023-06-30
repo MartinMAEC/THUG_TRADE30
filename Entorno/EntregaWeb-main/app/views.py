@@ -4,6 +4,8 @@ from .forms import ProductForm, CustomUserCreationForm
 from django.contrib.auth import authenticate, login
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
+from .models import Producto,Cart,CartItem
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -80,14 +82,30 @@ def registro(request):
     return render(request, 'registration/registro.html', data)
 
 
-
-def vistaprod(request,id):
-    producto = Producto.objects.get(id=id)  # Obtén el producto deseado de la base de datos
-    data = {
-        'p': producto
-    }
-    return render(request, 'app/prod.html', data)
+def detalle_producto(request, producto_id):
+    producto = get_object_or_404(Producto, id=producto_id)
+    return render(request, 'prod.html', {'product': producto})
 
 def admin_login_view(request):
     # Tu lógica de inicio de sesión del administrador aquí
     return render(request, 'registration/admin_login_view.html')
+def agregar_al_carrito(request,producto_id):
+    cart , created =Cart.objects.get_or_create(user=request.user)
+    producto=get_object_or_404(Producto, id=producto_id)
+    
+    cart_item,created=CartItem.objects.get_or_create(cart=cart, producto=producto)
+    if not created:
+            cart_item.quantity  +=1
+            cart_item.save()
+            
+    return redirect('carrito')
+def carrito(request):
+    cart = Cart.objects.filter(user=request.user).first()
+    total = cart.total_ca if cart else 0
+    cart_items = cart.cartitem_set.select_related('producto') if cart else []
+    
+    context = { 
+        'cart': cart_items,
+        'total': total
+    }
+    return render(request, 'carrito.html', context)
